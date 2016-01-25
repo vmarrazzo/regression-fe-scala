@@ -1,0 +1,17 @@
+<configuration>
+
+	<property name="TARGET" value="./target" />
+
+	<timestamp key="byMinute" datePattern="yyyy_MM_dd_HH_mm" />
+
+	<appender class="ch.qos.logback.core.ConsoleAppender" name="STDOUT">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - [%F:%L] - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="debug">
+		<appender-ref ref="STDOUT"/>
+	</root>
+
+</configuration>

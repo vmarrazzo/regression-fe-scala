@@ -1,0 +1,10 @@
+target/
+.idea/
+.cache*
+.classpath
+.project
+.settings/
+.worksheet/
+/bin/
+studio_jmc
+*.iml
