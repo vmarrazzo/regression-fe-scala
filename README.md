@@ -1,15 +1,31 @@
 # regression-fe-scala
 
-Application developed in Scala for Front-End regression testing.
+regression-fe-scala is a final user tool with goal to provide test automation facilities for web front-end regression. It was developed and released with open source tools and philosophy. The basic idea is to simplify regression testing execution adding two values formalize input test case and collect test execution report.
 
+Based on experience regression suite tends to grow with time so from early developing stage was imposted as requirement scalability and concurrent execution of test suite. For this reason the choice of developing language is restricted to ones that offer good tendency for scalability and concurrent execution.
 
+The chosen language is Scala, Akka for concurrent library and Sbt for build toolchain.
 
+### How to work with this application/project
 
-### How to work with project
+Now depends on which kind of profile you belong see sub-paragraph
 
+##### For impatient! ( or testing orienter )
 
-### The regression-fe-scala is based on following library
+1. Java 8 on your environment
+2. Firefox browser on your environment
+3. Open [release page](https://github.com/vmarrazzo/regression-fe-scala/releases) 
+4. Download regression-fe-scala-assembly-X.X.X.jar
+5. Downalod SampleTestBook.xlsx
+6. Launch command
+```
+java -jar regression-fe-scala-assembly-0.1.0.jar --testfile SampleTestBook.xlsx --sheetname CustomerSheet
+```
+7. After application end will be available a report file FE-Regress_YYYYMMDD_HHMMSS.xlsx with test report
+ 
+#### Behind the scene ( or developer oriented )
 
+The application launches up to five Firefox application where to spread up test cases and wait test outcomes. During single test execution it monitoring if particular error condition occurs and track it. Other important feature is to avoid work block for network latency so invoke suite stop (and partial data collection) in this occurence. For better details on implementation see [wiki pages](https://github.com/vmarrazzo/regression-fe-scala/wiki).
 
 ### Disclaimer
 
