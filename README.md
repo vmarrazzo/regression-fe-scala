@@ -21,9 +21,11 @@ Now depends on which kind of profile you belong see sub-paragraph
 ```
 java -jar regression-fe-scala-assembly-0.1.0.jar --testfile SampleTestBook.xlsx --sheetname CustomerSheet
 ```
-7. After application end will be available a report file FE-Regress_YYYYMMDD_HHMMSS.xlsx with test report
+After application end will be available a report file FE-Regress_YYYYMMDD_HHMMSS.xlsx with test report
 
-Add new verification to existring regression is possible inserting a new row with a testing url and rule to be tested. There are two possible rule choices:
+###### Extending regression suite
+
+Add new verification to existring regression is possible inserting a new row with a testing url and rule to be tested. There are two possible rule choices:<br>
 * Match content, it verify that loaded page contains a piece of text
 * XPath, it verify that described component with [XPath](http://toolsqa.com/selenium-webdriver/choosing-effective-xpath/) is present
 
