@@ -10,7 +10,7 @@ The chosen language is Scala, Akka for concurrent library and Sbt for build tool
 
 Now depends on which kind of profile you belong see sub-paragraph
 
-##### For impatient! ( or testing orienter )
+##### For impatient! ( or test oriented )
 
 1. Java 8 on your environment
 2. Firefox browser on your environment
@@ -22,8 +22,17 @@ Now depends on which kind of profile you belong see sub-paragraph
 java -jar regression-fe-scala-assembly-0.1.0.jar --testfile SampleTestBook.xlsx --sheetname CustomerSheet
 ```
 7. After application end will be available a report file FE-Regress_YYYYMMDD_HHMMSS.xlsx with test report
- 
-#### Behind the scene ( or developer oriented )
+
+Add new verification to existring regression is possible inserting a new row with a testing url and rule to be tested. There are two possible rule choices:
+* Match content, it verify that loaded page contains a piece of text
+* XPath, it verify that described component with [XPath](http://toolsqa.com/selenium-webdriver/choosing-effective-xpath/) is present
+
+| Rule type | Url column | Rule column |
+| :------------|:---------------| :-----|
+| Match content | I | J |
+| XPath | K | L |
+
+#### Behind the scene ( or develop oriented )
 
 The application launches up to five Firefox application where to spread up test cases and wait test outcomes. During single test execution it monitoring if particular error condition occurs and track it. Other important feature is to avoid work block for network latency so invoke suite stop (and partial data collection) in this occurence. For better details on implementation see [wiki pages](https://github.com/vmarrazzo/regression-fe-scala/wiki).
 
