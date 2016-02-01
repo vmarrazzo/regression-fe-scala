@@ -1,19 +1,20 @@
 # regression-fe-scala
 
-regression-fe-scala is a final user tool with goal to provide test automation facilities for web front-end regression. It was developed and released with open source tools and philosophy. The basic idea is to simplify regression testing execution adding two values formalize input test case and collect test execution report.
+regression-fe-scala is a quality assurance tool with goal to provide test automation facilities for web front-end regression. The basic idea is to catalog entire regression suite as MS Excel sheet and, after suite execution, provides as MS Excel sheet with results.
+ 
+Each input test case is composed by (url to be tested, component to be checked). For each test execution will :<br>
+1. load requested url<br>
+2. ensure that DOM is correctly loaded<br>
+3. verify with component presence<br>
 
-Based on experience regression suite tends to grow with time so from early developing stage was imposted as requirement scalability and concurrent execution of test suite. For this reason the choice of developing language is restricted to ones that offer good tendency for scalability and concurrent execution.
+The generic test is quite simple and can be used ot verify presence of described element into loaded web page. More detailed is regression suite and more test coverage can be reached about a complex web page (e.g. an aggregator of differente source).
 
-The chosen language is Scala, Akka for concurrent library and Sbt for build toolchain.
+The regression suite tends to grow with time increasing the included cases. To provide an acceptable time of execution this application executes in parallel test suite on difference browser process and aggregate final results.
 
-### How to work with this application/project
-
-Now depends on which kind of profile you belong see sub-paragraph
-
-##### For impatient! ( or test oriented )
+### How to use this application
 
 1. Java 8 on your environment
-2. Firefox browser on your environment
+2. Firefox installed on your environment
 3. Open [release page](https://github.com/vmarrazzo/regression-fe-scala/releases) 
 4. Download regression-fe-scala-assembly-X.X.X.jar
 5. Downalod SampleTestBook.xlsx
@@ -25,18 +26,18 @@ After application end will be available a report file FE-Regress_YYYYMMDD_HHMMSS
 
 ###### Extending regression suite
 
-Add new verification to existring regression is possible inserting a new row with a testing url and rule to be tested. There are two possible rule choices:<br>
-* Match content, it verify that loaded page contains a piece of text
-* XPath, it verify that described component with [XPath](http://toolsqa.com/selenium-webdriver/choosing-effective-xpath/) is present
+Adding test to existring regression can be donw through new rows that describes testing url and component rule. There are two possible rule choices:<br>
+a. Match content, it verify that loaded page contains a piece of text into page source<br>
+b. XPath, it verify that described component with [XPath](http://toolsqa.com/selenium-webdriver/choosing-effective-xpath/) is present<br><br>
+
+Each kind of rule is placed into a differente column for a row. (Into a same row cannot be Match content and XPath!!!!)
 
 | Rule type | Url column | Rule column |
 | :------------|:---------------| :-----|
 | Match content | I | J |
 | XPath | K | L |
 
-#### Behind the scene ( or develop oriented )
-
-The application launches up to five Firefox application where to spread up test cases and wait test outcomes. During single test execution it monitoring if particular error condition occurs and track it. Other important feature is to avoid work block for network latency so invoke suite stop (and partial data collection) in this occurence. For better details on implementation see [wiki pages](https://github.com/vmarrazzo/regression-fe-scala/wiki).
+Into the column A will be placed test case description for final reports.
 
 ### Disclaimer
 
