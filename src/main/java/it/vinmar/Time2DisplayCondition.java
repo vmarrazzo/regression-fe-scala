@@ -228,13 +228,14 @@ public class Time2DisplayCondition implements ExpectedCondition<Long> {
                 domStatus = fetchReadyState.get();
 
                 if (loadTime >= appliedTimeout * 1000) {
-                    logger.debug("During DOM complete loading exit with timeout!");
-                    throw new TimeoutException("During DOM complete loading exit with timeout!");
+                    String message = "Timeout occurs before \"DOM Ready\" state!";
+                    logger.debug(message);
+                    throw new TimeoutException(message);
                 } else {
                     logger.debug("DOM complete loading in " + fetchTotalLoadTime.get() + " ms");
                 }
 
-                logger.debug("After " + loadTime + " ms DOM status is " + domStatus);
+                logger.debug("After " + loadTime + " ms DOM state is " + domStatus);
 
             } while (!domStatus.equals("complete"));
 
@@ -290,7 +291,7 @@ public class Time2DisplayCondition implements ExpectedCondition<Long> {
             logger.error("Ending monitoring on locator with \"Javascript ERROR\"!", jex);
         }
         catch ( Exception ex ) {
-            logger.error("Monitor crasches with unexpected error!", ex);
+            logger.error("Monitor crashes with unexpected error!", ex);
         }
 
         return result;

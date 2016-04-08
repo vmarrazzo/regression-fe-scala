@@ -41,7 +41,9 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
 
   it should "perform an initialization" in {
 
-    val props = Props(classOf[TestManager], None)
+    val testTimeout = 30.minutes
+
+    val props = Props(classOf[TestManager], None, testTimeout)
 
     underTest = TestActorRef(props, name = "TestManager_under_test")
 
@@ -49,7 +51,7 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
 
     var retResults: TestResults = null
 
-    within(30.minutes) {
+    within(testTimeout) {
 
       retResults = null
 
@@ -68,16 +70,18 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
   it should "fail when grid is not available" in {
 
     import java.net.URL
-    val grid : Option[URL] = Some(new URL("http://localhost:4444/wd/hub"))
+    val grid : Option[URL] = Some(new URL("http://fake.grid.host:4444/wd/hub"))
 
-    val props = Props(classOf[TestManager], grid)
+    val testTimeout = 2.minutes
+
+    val props = Props(classOf[TestManager], grid, testTimeout)
     val underTest : TestActorRef[TestManager] = TestActorRef( props, name="TestManager_under_test_grid_fail")
 
     info("Send test book to under test object")
 
     underTest ! NewTestBook(testBook)
 
-    val resultMessage = receiveOne(2.minutes)
+    val resultMessage = receiveOne(testTimeout)
 
     resultMessage must be (MasterWorkerProtocol.ManagerEncounterInitProblem)
   }

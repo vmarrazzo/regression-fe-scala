@@ -64,7 +64,7 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 
 		var retMessage : TestResult = null
 
-		expectNoMsg(5.seconds)
+		expectNoMsg(10.seconds)
 
 		within(2.minutes) {
 
@@ -72,7 +72,7 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 
 			underTest ! in
 
-			retMessage = expectMsgClass(10.seconds, classOf[TestResult])
+			retMessage = expectMsgClass(1.minutes, classOf[TestResult])
 
 			info(retMessage.toString)
 		}
@@ -102,7 +102,7 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 
 		TestSubStatus.toSubStatus(res0004.loadTime) match {
 			case None => fail("Test_0004 must return a TimeoutError!")
-			case Some(x) => x must be (atLeastOneOf(TestSubStatus.TimeoutError, TestSubStatus.SystemError))
+			case Some(x) => List(TestSubStatus.TimeoutError, TestSubStatus.SystemError) must contain(x)
 		}
 	}
 

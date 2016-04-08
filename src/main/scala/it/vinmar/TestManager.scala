@@ -55,7 +55,7 @@ class TestBookTimeout(timeout: FiniteDuration = 10.minutes) extends Actor {
 
   override def preStart : Unit = {
 
-    logger.trace(s"Init TestManager Timeout @ ${timeout.toString}")
+    logger.trace(s"Init TestManager with a timeout of ${timeout.toString}")
   }
 
   override def receive: Receive = {
@@ -82,7 +82,7 @@ class TestBookTimeout(timeout: FiniteDuration = 10.minutes) extends Actor {
 /**
  * This is the core actor that manages the test book execution
  */
-class TestManager(val grid: Option[URL] = None) extends Actor {
+class TestManager(val grid: Option[URL] = None, val timeout: Duration = 60.minutes) extends Actor {
 
   import MasterWorkerProtocol._
 
@@ -139,7 +139,7 @@ class TestManager(val grid: Option[URL] = None) extends Actor {
     logger.info("Workers are initialized")
 
     // after executors start TM generates a child to protect long time execution sending a timeout message
-    timeoutActor = context.actorOf(Props(classOf[TestBookTimeout], 60.minutes))
+    timeoutActor = context.actorOf(Props(classOf[TestBookTimeout], timeout))
   }
 
   /**

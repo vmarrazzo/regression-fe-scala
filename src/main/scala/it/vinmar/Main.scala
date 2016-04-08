@@ -2,11 +2,13 @@ package it.vinmar
 
 import akka.actor._
 import org.slf4j.LoggerFactory
-import it.vinmar.MasterWorkerProtocol.{ManagerEncounterInitProblem, TestResults, TimeoutOnTestBook, NewTestBook}
+import it.vinmar.MasterWorkerProtocol.{ManagerEncounterInitProblem, NewTestBook, TestResults, TimeoutOnTestBook}
 import it.vinmar.TestBookReader.InputTest
-
-import java.net.{ URI, URL}
+import java.net.{URI, URL}
 import java.io.File
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 /**
   * Created by vincenzo on 21/01/16.
@@ -70,10 +72,13 @@ object Main {
 
         val tb = TestBookReader.parseInputTestBook( config.testfile.getAbsolutePath, config.sheetname)
 
-        val system = ActorSystem("MySystem")
-        val tm = system.actorOf(Props(classOf[TestManager], config.grid), "MyTestManager")
+        // for now is hardcoded in future will be a command line argument
+        val timeout: Duration = 2.hours
 
-        val bl = system.actorOf(Props(classOf[BookListner], tb, tm), "MyBookListner")
+        val system = ActorSystem("MySystem")
+        val tm = system.actorOf(Props(classOf[TestManager], config.grid, timeout), "MyTestManager")
+
+        val bl = system.actorOf(Props(classOf[BookListener], tb, tm, timeout), "MyBookListener")
       }
       case None => unitParser1.showUsage
     }
@@ -87,17 +92,14 @@ object Main {
       * @param book
       * @param manager
       */
-    class BookListner(val book: List[InputTest], val manager: ActorRef) extends Actor {
+    class BookListener(val book: List[InputTest], val manager: ActorRef, val deadline: Duration) extends Actor {
 
       import java.util.{ Timer, TimerTask }
-      import scala.concurrent.duration.Duration
-      import scala.concurrent.duration._
       import java.text.SimpleDateFormat
 
       val formatter = new SimpleDateFormat("yyyyMMdd_HHmmss")
 
       val timer = new Timer(true)
-      val timeout : Duration = 30 minutes
 
       /**
         * Logger
@@ -110,18 +112,18 @@ object Main {
 
         manager ! NewTestBook(book)
 
-        logger.info(s"Test Manager timeout is ${timeout} to complete test book.")
+        logger.info(s"Test Manager deadline is ${deadline} to complete test book.")
 
         timer.schedule(new TimerTask {
           def run() = {
 
-            logger.error(s"Test Manager does not complete into ${timeout} so force ending!")
+            logger.error(s"Test Manager does not complete into ${deadline} so force ending!")
 
             manager ! TimeoutOnTestBook
 
             timer.cancel
           }
-        }, timeout.toMillis)
+        }, deadline.toMillis)
       }
 
       override def receive: Receive = {

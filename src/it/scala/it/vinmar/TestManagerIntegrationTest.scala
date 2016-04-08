@@ -40,14 +40,16 @@ class TestManagerIntegrationTest(_system: ActorSystem) extends TestKit(_system)
     import java.net.URL
     val grid : Option[URL] = Some(new URL("http://localhost:4444/wd/hub"))
 
-    val props = Props(classOf[TestManager], grid)
+    val testTimeout = 2.minutes
+
+    val props = Props(classOf[TestManager], grid, testTimeout)
     val underTest : TestActorRef[TestManager] = TestActorRef( props, name="TestManager_under_test")
 
     info("Send test book to under test object")
 
     underTest ! NewTestBook(testBook)
 
-    val retResults = expectMsgClass(2.minutes, classOf[TestResults])
+    val retResults = expectMsgClass(testTimeout, classOf[TestResults])
 
     val results : Seq[TestResult] = retResults.testResults
 

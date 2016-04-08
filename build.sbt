@@ -4,7 +4,7 @@ import sbt._
 
 lazy val commonSettings = Seq(
   organization := "it.vinmar",
-  version := "0.1.0",
+  version := "0.2.0-SNAPSHOT",
   scalaVersion := "2.11.7",
   logLevel := Level.Info,
   crossScalaVersions := Seq("2.10.4", scalaVersion.toString),
@@ -25,7 +25,7 @@ lazy val root = (project in file(".")).
     name := "regression-fe-scala"
 )
 
-val seleniumVersion = "2.48.2"
+val seleniumVersion = "2.53.0"
 val akkaVersion = "2.3.6"
 val poiVersion = "3.11"
 
