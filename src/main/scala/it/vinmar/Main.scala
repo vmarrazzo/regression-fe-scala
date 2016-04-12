@@ -7,6 +7,8 @@ import it.vinmar.TestBookReader.InputTest
 import java.net.{URI, URL}
 import java.io.File
 
+import org.openqa.selenium.remote.DesiredCapabilities
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
@@ -76,7 +78,7 @@ object Main {
         val timeout: Duration = 2.hours
 
         val system = ActorSystem("MySystem")
-        val tm = system.actorOf(Props(classOf[TestManager], config.grid, timeout), "MyTestManager")
+        val tm = system.actorOf(Props(classOf[TestManager], DesiredCapabilities.firefox, config.grid, timeout), "MyTestManager")
 
         val bl = system.actorOf(Props(classOf[BookListener], tb, tm, timeout), "MyBookListener")
       }
