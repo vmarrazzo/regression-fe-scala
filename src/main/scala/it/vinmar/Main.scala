@@ -141,7 +141,7 @@ object Main {
 
             timer.cancel
 
-            context.system.shutdown()
+            context.system.terminate()
           }
         }
         case ManagerEncounterInitProblem => {
@@ -150,7 +150,7 @@ object Main {
 
           timer.cancel
 
-          context.system.shutdown()
+          context.system.terminate()
         }
         case x: Any => {
           logger.warn(s"Received an un-handled message from ${sender.path.name}!")

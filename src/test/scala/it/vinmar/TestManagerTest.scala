@@ -1,13 +1,13 @@
 package it.vinmar
 
-import it.vinmar.TestBookReader.{ XpathContent, MatchContent, InputTest }
+import it.vinmar.TestBookReader.{InputTest, MatchContent, XpathContent}
 import it.vinmar.MasterWorkerProtocol._
-
+import org.openqa.selenium.remote.DesiredCapabilities
 import org.scalatest._
+import akka.actor.{ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 
-import akka.actor._
-
-import akka.testkit.{ ImplicitSender, TestKit, TestActorRef }
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 class TestManagerTest(_system: ActorSystem) extends TestKit(_system) 
@@ -27,7 +27,7 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
   override def afterAll {
     info("Stop Test Actor System")
     TestKit.shutdownActorSystem(system)
-    system.awaitTermination(60.seconds)
+    Await.result( system.terminate(), 60.seconds)
   }
 
   var underTest: TestActorRef[TestManager] = null
@@ -43,7 +43,7 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
 
     val testTimeout = 30.minutes
 
-    val props = Props(classOf[TestManager], None, testTimeout)
+    val props = Props(classOf[TestManager], DesiredCapabilities.firefox, None, testTimeout)
 
     underTest = TestActorRef(props, name = "TestManager_under_test")
 
@@ -70,19 +70,31 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
   it should "fail when grid is not available" in {
 
     import java.net.URL
-    val grid : Option[URL] = Some(new URL("http://fake.grid.host:4444/wd/hub"))
 
-    val testTimeout = 2.minutes
+    val testTimeout = 20.seconds
+    val fakeGrid = Some(new URL("http://fake.grid.host:4444/wd/hub"))
 
-    val props = Props(classOf[TestManager], grid, testTimeout)
-    val underTest : TestActorRef[TestManager] = TestActorRef( props, name="TestManager_under_test_grid_fail")
+    val props = Props(classOf[TestManager], DesiredCapabilities.firefox, fakeGrid, 2.minutes)
 
-    info("Send test book to under test object")
+    within(testTimeout) {
+      val underTest = TestActorRef( props, name="TestManager_under_test_grid_fail")
+      underTest ! NewTestBook(testBook)
+      expectMsg(MasterWorkerProtocol.ManagerEncounterInitProblem)
+      Thread.sleep(3000)
+    }
+  }
+  
+  it should "fail when is requested unsupported browser" in {
 
-    underTest ! NewTestBook(testBook)
+    val testTimeout = 20.seconds
 
-    val resultMessage = receiveOne(testTimeout)
+    val props = Props(classOf[TestManager], DesiredCapabilities.safari, None, 2.minutes)
 
-    resultMessage must be (MasterWorkerProtocol.ManagerEncounterInitProblem)
+    within(testTimeout) {
+      val underTest = TestActorRef( props, name="TestManager_under_test_unsupported_browser")
+      underTest ! NewTestBook(testBook)
+      expectMsg(MasterWorkerProtocol.ManagerEncounterInitProblem)
+      Thread.sleep(3000)
+    }
   }
 }

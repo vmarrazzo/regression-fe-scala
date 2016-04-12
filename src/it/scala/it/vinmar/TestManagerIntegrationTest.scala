@@ -1,12 +1,14 @@
 package it.vinmar
 
-import akka.actor.{Props, ActorSystem}
-import akka.testkit.{TestActorRef, ImplicitSender, TestKit}
-import org.scalatest.{MustMatchers, BeforeAndAfterAll, FlatSpecLike}
+import akka.actor.{ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, MustMatchers}
 
 import scala.concurrent.duration._
-
 import it.vinmar.MasterWorkerProtocol._
+import org.openqa.selenium.remote.DesiredCapabilities
+
+import scala.concurrent.Await
 
 /**
   * Created by vincenzo on 20/01/16.
@@ -28,21 +30,21 @@ class TestManagerIntegrationTest(_system: ActorSystem) extends TestKit(_system)
   override def afterAll {
     info("Stop Test Actor System")
     TestKit.shutdownActorSystem(system)
-    system.awaitTermination(10.seconds)
+    Await.result(system.terminate(), 10.seconds)
   }
 
-  it should "perform an test book execution via grid" in {
+  it should "perform a test book execution via grid" in {
 
     val testBook = TestBookReader.parseInputTestBook( "./src/it/resources/TestBookIt.xlsx", "IntegrationSheet")
 
     val expectedNrTest = testBook.size
 
     import java.net.URL
-    val grid : Option[URL] = Some(new URL("http://localhost:4444/wd/hub"))
+    val grid = Some(new URL(System.getProperty("integration.test.grid", "http://whereis.selenium.grid:4444/wd/hub")))
 
     val testTimeout = 2.minutes
 
-    val props = Props(classOf[TestManager], grid, testTimeout)
+    val props = Props(classOf[TestManager], DesiredCapabilities.firefox, grid, testTimeout)
     val underTest : TestActorRef[TestManager] = TestActorRef( props, name="TestManager_under_test")
 
     info("Send test book to under test object")

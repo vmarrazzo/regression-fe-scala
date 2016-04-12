@@ -17,7 +17,7 @@ import org.openqa.selenium.remote.{ RemoteWebDriver, DesiredCapabilities }
 
 import java.net.URL
 
-class TestExecutor(desiredBrowser: DesiredCapabilities, val grid: Option[URL] = None) extends Actor /* logger akka ? */ {
+class TestExecutor(val desiredBrowser: DesiredCapabilities, val grid: Option[URL] = None) extends Actor /* logger akka ? */ {
 
   /**
    *
@@ -64,7 +64,7 @@ class TestExecutor(desiredBrowser: DesiredCapabilities, val grid: Option[URL] = 
    *
    * @return
    */
-  def receive = {
+  override def receive = {
 
     case in: InputTest => sender ! {
       val locType = in.testType

@@ -1,6 +1,7 @@
 package it.vinmar
 
 import it.vinmar.TestBookReader.InputTest
+import org.openqa.selenium.remote.DesiredCapabilities
 import org.slf4j.LoggerFactory
 
 import akka.actor._
@@ -82,7 +83,10 @@ class TestBookTimeout(timeout: FiniteDuration = 10.minutes) extends Actor {
 /**
  * This is the core actor that manages the test book execution
  */
-class TestManager(val grid: Option[URL] = None, val timeout: Duration = 60.minutes) extends Actor {
+class TestManager(val desiredBrowser: DesiredCapabilities, val grid: Option[URL] = None, val timeout: Duration = 60.minutes) extends Actor {
+
+  def this(grid: Option[URL]) = this(DesiredCapabilities.firefox, grid)
+  def this(desiredBrowser: DesiredCapabilities) = this(desiredBrowser, None)
 
   import MasterWorkerProtocol._
 
@@ -134,7 +138,8 @@ class TestManager(val grid: Option[URL] = None, val timeout: Duration = 60.minut
       case None => logger.debug("Local environment browser monitoring")
     }
 
-    teRouter = context.actorOf(Props(classOf[TestExecutor], grid).withRouter(RoundRobinPool(nrTestExecutors)), name = "workerRouter")
+    teRouter = context.actorOf(Props(classOf[TestExecutor], desiredBrowser, grid)
+                      .withRouter(RoundRobinPool(nrTestExecutors)), name = "workerRouter")
 
     logger.info("Workers are initialized")
 

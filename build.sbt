@@ -3,11 +3,8 @@ import sbt.Keys._
 import sbt._
 
 lazy val commonSettings = Seq(
-  organization := "it.vinmar",
   version := "0.2.0-SNAPSHOT",
-  scalaVersion := "2.11.7",
   logLevel := Level.Info,
-  crossScalaVersions := Seq("2.10.4", scalaVersion.toString),
   scalacOptions ++= Seq("-unchecked", "-deprecation"),
   resolvers ++= Seq("snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
     "releases" at "http://oss.sonatype.org/content/repositories/releases",
@@ -22,11 +19,13 @@ lazy val root = (project in file(".")).
   settings(Defaults.itSettings: _*).
   //enablePlugins(AutomateHeaderPlugin).
   settings(
+    organization := "it.vinmar",
+    scalaVersion := "2.11.7",
     name := "regression-fe-scala"
 )
 
 val seleniumVersion = "2.53.0"
-val akkaVersion = "2.3.6"
+val akkaVersion = "2.4.3"
 val poiVersion = "3.11"
 
 val log4jDependencies = Seq(
@@ -45,11 +44,12 @@ val akkaDependencies = Seq(
 )
 
 val testingDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "2.2.4" % "it,test",
+  "org.scalatest" %% "scalatest" % "2.2.6" % "it,test",
   "org.pegdown" % "pegdown" % "1.4.2" % "it,test"
 )
 
 libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.4",
   "org.seleniumhq.selenium" % "selenium-server" % seleniumVersion,
   "org.eclipse.jetty" % "jetty-http" % "9.3.5.v20151012",
   "com.google.code.findbugs" % "jsr305" % "3.0.0",
@@ -63,13 +63,13 @@ javaOptions in Test := Seq("-Dwebdriver.chrome.driver=./src/test/resources/chrom
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports")
 testOptions in IntegrationTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports")
+javaOptions in IntegrationTest += "-Dintegration.test.grid=http://localhost:4444/wd/hub"
 
 testOptions in IntegrationTest += Tests.Setup( () => println("Setup Integration Test") )
 testOptions in IntegrationTest += Tests.Cleanup( () => println("Cleanup Integration Test") )
 
-ScoverageSbtPlugin.ScoverageKeys.coverageMinimum := 50
-
-ScoverageSbtPlugin.ScoverageKeys.coverageFailOnMinimum := true
+jacoco.settings
+itJacoco.settings
 
 //assemblyJarName in assembly := "something.jar"
 test in assembly := {}

@@ -200,19 +200,7 @@ public class Time2DisplayCondition implements ExpectedCondition<Long> {
                 }
         });
 
-        /**
-         * After loadingUrl completes starts the real rule checking
-         */
-        Future<Boolean> resultIsVisible = ForkJoinPool.commonPool().submit( () -> {
-
-                WebDriverWait driverWait = new WebDriverWait(loadingUrl.get(), appliedTimeout);
-
-                logger.debug("Starting monitoring on locator.");
-
-                WebElement find = driverWait.until(ExpectedConditions.visibilityOfElementLocated(locator2grab));
-
-                return find != null;
-        });
+		
 
         /**
          * Waiting for DOM complete loading
@@ -240,15 +228,31 @@ public class Time2DisplayCondition implements ExpectedCondition<Long> {
             } while (!domStatus.equals("complete"));
 
             return "complete";
+        });		
+		
+		
+		
+        /**
+         * After loadingUrl completes and completeReadyState, it checks starts the real rule checking
+         */
+        Future<Boolean> resultIsPresence = ForkJoinPool.commonPool().submit( () -> {
+
+                WebDriverWait driverWait = new WebDriverWait(loadingUrl.get(), appliedTimeout);
+
+                logger.debug("Starting monitoring on locator.");
+
+                WebElement find = driverWait.until(ExpectedConditions.presenceOfElementLocated(locator2grab));
+
+                return find != null;
         });
 
         try {
 
-            logger.trace("Component is visible " + resultIsVisible.get());
+            logger.trace("Component is present " + resultIsPresence.get());
 
             if ( completeReadyState.get().equals("complete") ) {
 
-                if ( resultIsVisible.get() ) {
+                if ( resultIsPresence.get() ) {
                     Long loadTime = fetchTotalLoadTime.get();
 
                     if (loadTime >= appliedTimeout * 1000) {

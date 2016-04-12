@@ -1,21 +1,21 @@
 package it.vinmar
 
-import java.net.URL
-
 import it.vinmar.TestBookReader.InputTest
-import it.vinmar.TestResult.Passed
-import it.vinmar.TestResult.Failed
-import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
+import it.vinmar.TestResult.{Passed, Failed}
+import it.vinmar.TestSubStatus.SubStatus
 import org.scalatest._
-
 import it.vinmar.TestBookReader._
-
 import akka.actor._
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
 
-import akka.testkit.{TestProbe, ImplicitSender, TestKit, TestActorRef}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with FlatSpecLike with BeforeAndAfterAll with MustMatchers {
+class TestExecutorTest(_system: ActorSystem) extends TestKit(_system)
+				with ImplicitSender
+				with FlatSpecLike
+				with BeforeAndAfterAll
+				with MustMatchers {
 
 	behavior of "Test Executor"
 
@@ -23,18 +23,15 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 
 	override def beforeAll {
 		info("Start Test Actor System")
-
 	}
 
 	override def afterAll {
 		info("Stop Test Actor System")
 		TestKit.shutdownActorSystem(system)
-		system.awaitTermination(10.seconds)
+		Await.result(system.terminate(), 10.seconds)
 	}
 
 	var underTest : TestActorRef[TestExecutor] = null
-
-	val grid : Option[URL] = Some(new URL("http://localhost:4444/wd/hub"))
 
 	it should "perform an initialization" in {
 
@@ -48,10 +45,12 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 		//val props = Props(classOf[TestExecutor], DesiredCapabilities.chrome)
 		//val props = Props(classOf[TestExecutor], DesiredCapabilities.firefox)
 
+		import java.net.URL
+		val grid = Some(new URL(System.getProperty("integration.test.grid", "http://whereis.selenium.grid:4444/wd/hub")))
+
 		val props = Props(classOf[TestExecutor], grid)
 
 		underTest = TestActorRef( props, name="TestExecutor_under_test")
-
 	}
 
 	/**
@@ -100,10 +99,9 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 
 		res0004.result must be (Failed)
 
-		TestSubStatus.toSubStatus(res0004.loadTime) match {
-			case None => fail("Test_0004 must return a TimeoutError!")
-			case Some(x) => List(TestSubStatus.TimeoutError, TestSubStatus.SystemError) must contain(x)
-		}
+    val tstResult : Option[SubStatus] = TestSubStatus.toSubStatus(res0004.loadTime)
+
+    tstResult must contain oneOf (TestSubStatus.TimeoutError, TestSubStatus.SystemError)
 	}
 
 	it should "be terminated via message" in {
@@ -122,25 +120,6 @@ class TestExecutorTest(_system: ActorSystem) extends TestKit(_system) with Impli
 		}
 
 		probe.expectMsgPF(2.seconds){ case Terminated(actorRef) => true }
-	}
-
-	it should "can be created via default Props" in {
-
-		info("Create a new one with default configuration")
-		val props = Props(classOf[TestExecutor])
-		underTest = TestActorRef( props, name="TestExecutor_under_test")
-
-		info("Fifth a test that pass")
-
-		coreTest(InputTest("Test_0005", XpathContent, "Test to pass", "http://www.paginegialle.it/", "//a[@class='logo']")).result must be (Passed)
-
-		info("Sixth a test that fail")
-
-		coreTest(InputTest("Test_0006", MatchContent, "Test to fail", "http://www.tuttocitta.it/", "unexisting_string")).result must be (Failed)
-
-		underTest ! 0L
-
-		expectNoMsg(5.seconds)
 	}
 
 }
