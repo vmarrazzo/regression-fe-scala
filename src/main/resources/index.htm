@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=10">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,initial-scale=1.0" />
+<link rel="shortcut icon" href="res/img/favicon.ico" type="image/x-icon">
+<link rel="icon" href="res/img/favicon.ico" type="image/x-icon">
+<title>XPath Evaluator on JSON Tester</title>
+
+<meta property='og:type' content='website'/>
+<meta property='og:description' content=''/>
+
+<link type="text/css" href="res/css/style.css" media="all" rel="stylesheet"/>
+<script src="res/js/deps/jquery.js"></script>
+<script src="res/js/site.js"></script>
+<script src="jsonpath.js"></script>
+</head>
+<body>
+
+<section class="layout">
+	<div class="cover"></div>
+	<div class="content" data-section="overview">
+
+		<!-- sticky -->
+		<hr/>
+
+		<!-- XPath -->
+		<h2 data-section="xpath">XPath</h2>
+		<p>
+			A powerful tool when dealing with <abbr title="Extended Markup Language">XML</abbr> is the advantage of
+			using <abbr title="XML Path Language">XPath</abbr>.
+			<abbr title="XML Path Language">XPath</abbr> is a <a href="http://www.w3.org/TR/xpath/" target="_new">standardized</a>
+			language for addressing parts of an <abbr title="Extended Markup Language">XML</abbr> document and
+			enables features such as analysis, transformation &amp; refined data selection out of an
+			<abbr title="Extended Markup Language">XML</abbr> structure.
+
+			The lack of a similar feature for working with <abbr title="JavaScript Object Notation">JSON</abbr>
+			has prompted <a href="http://code.google.com/p/json-path/" target="_new">initiatives</a> such 
+			as <a href="https://developer.mozilla.org/en-US/docs/JSON/JSONPath" target="_new">JSONPath</a>,
+			which has not been standardized or widely accepted by the community.
+			With <strong>DefiantJS</strong>, you can unleash the power of <abbr title="XML Path Language">XPath</abbr>
+			on <abbr title="JavaScript Object Notation">JSON</abbr> objects, with no retooling or reschooling!
+		</p>
+		<p>&#160;</p>
+
+		<h3 data-section="expressions-table">Expressions table</h3>
+		<p>
+			The syntax table below offers a glimpse of the power that <abbr title="XML Path Language">XPath</abbr> brings.
+			<abbr title="XML Path Language">XPath</abbr> has a lot
+			<a href="http://msdn.microsoft.com/en-us/library/ms256122(v=vs.110).aspx" target="_new">more</a> to
+			<a href="http://www.w3schools.com/xpath/xpath_syntax.asp" target="_new">offer</a>.
+			An important advantage of implementing <abbr title="XML Path Language">XPath</abbr>, as contrasted with
+			<strong>JSONPath</strong>, is that this language has been documented a great deal on the web and 
+			information and how-to's can easily be found and digested.
+		</p>
+
+		<table class="xpath-expressions">
+		<tr>
+			<th>Expression</th>
+			<th>Description</th>
+		</tr>
+		<tr><td>/</td>   <td>Child operator; selects immediate children of the left-side collection. When this path operator appears at the start of the pattern, it indicates that children should be selected from the root node.</td></tr>
+		<tr><td>//</td>  <td>Recursive descent; searches for the specified element at any depth. When this path operator appears at the start of the pattern, it indicates recursive descent from the root node.</td></tr>
+		<tr><td>.</td>   <td>Indicates the current context.</td></tr>
+		<tr><td>..</td>  <td>The parent of the current context.</td></tr>
+		<tr><td>*</td>   <td>Wildcard; selects all elements regardless of the element name.</td></tr>
+		<tr><td>@</td>   <td>Attribute; prefix for an attribute name.</td></tr>
+		<tr><td>@*</td>  <td>Attribute wildcard; selects all attributes regardless of name.</td></tr>
+		<tr><td>[]</td>  <td>Subscript operator; applies a filter pattern <strong>OR</strong> used for indexing within a collection.</td></tr>
+		<tr><td>|</td>   <td>Union operator; results in a combination of element sets</td></tr>
+		<tr><td>()</td>  <td>Groups operations to explicitly establish precedence</td></tr>
+		</table>
+		<p>
+			In order to access <abbr title="XML Path Language">XPath</abbr> functionality easily, some global objects has been
+			extended with useful methods, for instance; <code class="nolink" data-target="#JSON.search"><span class="obj">JSON</span>.<span class="fn">search</span></code>.
+			Detailed information about these extensions can be found in the <a class="nolink" href="/goto/reference/">Function reference</a> section.
+		</p>
+		<p>&#160;</p>
+
+		<h3 data-section="xpath-evaluator">XPath Evaluator</h3>
+		<p>
+			Not familiar with <abbr title="XML Path Language">XPath</abbr>? Don't worry, use the
+			<abbr title="XML Path Language">XPath</abbr> <b>Evaluator</b> below and you will become an expert
+			in no time.
+		</p>
+
+		<div class="xpath-evaluator">
+			<div class="structure"><!-- Dynamically Rendered --></div>
+			<textarea class="textor" spellcheck="false"></textarea>
+			<div class="error-json">
+				<figure class="icon-warning"></figure>
+				Invalid JSON data
+			</div>
+			<div class="examples">
+				<h2>Sample XPath</h2>
+				<a class="nolink" href="/evaluator/eval-xpath/">//*</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//book</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//category</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//@price</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//title</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//title/text()</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//bicycle</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//book[3]</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//book[position() &lt;= 2]</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//book[last()]</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//*[@price &gt; 10]</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//*[category="reference"]/author</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//*[contains(title, "the")]</a>
+				<a class="nolink" href="/evaluator/eval-xpath/">//book[isbn]</a>
+			</div>
+		</div>
+
+		<!--
+		<div class="btn-row">
+			<span class="input-btn">
+				<input type="text"/>
+				<a class="nolink button" href="/evaluator/get-data/">Get Data</a>
+			</span>
+		</div>
+		-->
+
+		<div class="btn-row">
+			<!-- <span class="btn-group">
+				<a class="nolink button active" href="/evaluator/switch-to-json/">JSON</a>
+				<a class="nolink button" href="/evaluator/switch-to-xml/">XML</a>
+			</span> -->
+			<a class="nolink button" href="/evaluator/toggle-edit/">Edit</a>
+			<span class="input-btn">
+				<input type="text"/>
+				<a class="nolink button" href="/evaluator/eval-xpath/">Go</a>
+			</span>
+			<!-- <a class="nolink button right" href="/evaluator/xpath-samples/">Examples</a> -->
+		</div>
+		<p>&#160;</p>
+
+	</div>
+</section>
+
+</body>
+</html>
