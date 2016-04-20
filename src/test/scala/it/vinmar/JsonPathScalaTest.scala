@@ -108,7 +108,12 @@ class JsonPathScalaTest extends FlatSpec
     val patterns: Map[String, Boolean] = List(
       new Tuple2("$",true),
       new Tuple2("$..status",true),
-      new Tuple2("$..*[?(@property === 'status' && @ === \"200\")]",true)
+      new Tuple2("$..*[?(@property === 'sortby' && @ === 'relevance')]",true),
+      // new Tuple2("$..*[?(@property === 'status' && @ === '200')]",true),
+      new Tuple2("$..params[?(@.device === 'android')]",true),
+      new Tuple2("$..*[?(@property === 'device' && @ === 'android')]",true),
+      new Tuple2("$..*[?(@property === 'device' && @ !== 'symbian')]",true),
+      new Tuple2("$..*[?(@property === 'device' && @ === 'symbian')]",false)
     ).toMap
 
     coreTest(patterns, jsonFromUrl)
