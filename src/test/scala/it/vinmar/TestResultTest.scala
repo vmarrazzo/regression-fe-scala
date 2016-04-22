@@ -1,9 +1,8 @@
 package it.vinmar
 
+import it.vinmar.TestResult.{ExitStatus, Passed}
+import org.scalatest.Matchers._
 import org.scalatest._
-import Matchers._
-
-import it.vinmar.TestResult._
 
 class TestResultTest extends FlatSpec with BeforeAndAfterAll with MustMatchers {
 

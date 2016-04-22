@@ -3,19 +3,13 @@ package it.vinmar
 import java.io.FileInputStream
 import java.nio.file.{Files, Path, Paths}
 
-import it.vinmar.TestBookReader.InputTest
-import org.apache.poi.ss.usermodel.{Row, Sheet, WorkbookFactory, Workbook}
-
-import org.scalatest._
+import org.apache.poi.ss.usermodel.{Row, Sheet, WorkbookFactory}
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, MustMatchers}
 import org.scalatest.Matchers._
-
-import it.vinmar.TestResult._
-import it.vinmar.TestResult.Failed
-
-import it.vinmar.TestSubStatus._
-
-import it.vinmar.TestBookReader._
 import it.vinmar.TestResultWriter._
+import TestBookReader.{InputTest, MatchContent, XpathContent}
+import TestResult.Passed
+import TestSubStatus.TimeoutError
 
 class TestResultWriterTest extends FlatSpec with BeforeAndAfterAll with MustMatchers {
 
@@ -52,9 +46,9 @@ class TestResultWriterTest extends FlatSpec with BeforeAndAfterAll with MustMatc
 
     val result : List[TestResult] = new TestResult("Test_0001", Passed, 12345, Some(noErrorMap)) ::
                                     new TestResult("Test_0002", Passed,  6345, Some(noErrorMap + ("incorrectClient" -> 400))) ::
-                                    new TestResult("Test_0003", Failed, 14345, Some(noErrorMap)) ::
-                                    new TestResult("Test_0004", Failed, 17845, Some(noErrorMap + ("incorrectServer" -> 500))) ::
-                                    new TestResult("Test_0005", Failed, TimeoutError.code, Some(noErrorMap + ("incorrectServer" -> 500))) ::
+                                    new TestResult("Test_0003", TestResult.Failed, 14345, Some(noErrorMap)) ::
+                                    new TestResult("Test_0004", TestResult.Failed, 17845, Some(noErrorMap + ("incorrectServer" -> 500))) ::
+                                    new TestResult("Test_0005", TestResult.Failed, TimeoutError.code, Some(noErrorMap + ("incorrectServer" -> 500))) ::
                                     Nil
 
     val resultFile = new java.io.File(file2Save)

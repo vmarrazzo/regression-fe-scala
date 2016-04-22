@@ -1,12 +1,12 @@
-package it.vinmar
+package it.vinmar.selenium
 
-import it.vinmar.TestBookReader.InputTest
-import it.vinmar.TestResult.{Passed, Failed}
-import it.vinmar.TestSubStatus.SubStatus
-import org.scalatest._
-import it.vinmar.TestBookReader._
 import akka.actor._
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
+import it.vinmar.TestBookReader.{InputTest, MatchContent, XpathContent}
+import it.vinmar.TestResult.{Failed, Passed}
+import it.vinmar.TestSubStatus.SubStatus
+import it.vinmar.{TestResult, TestSubStatus}
+import org.scalatest.{FlatSpecLike,BeforeAndAfterAll,MustMatchers}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

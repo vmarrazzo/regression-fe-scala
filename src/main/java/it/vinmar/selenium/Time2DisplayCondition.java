@@ -1,4 +1,4 @@
-package it.vinmar;
+package it.vinmar.selenium;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.TimeoutException;

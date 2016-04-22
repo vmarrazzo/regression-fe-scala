@@ -1,8 +1,8 @@
 package it.vinmar
 
 import akka.actor.{Actor, ActorRef, PoisonPill}
-import it.vinmar.MasterWorkerProtocol._
-import it.vinmar.TestBookReader.InputTest
+import ManagerExecutorProtocol._
+import TestBookReader.InputTest
 import org.slf4j.LoggerFactory
 
 import java.util.{ Timer, TimerTask }

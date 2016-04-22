@@ -73,7 +73,7 @@ itJacoco.settings
 
 //assemblyJarName in assembly := "something.jar"
 test in assembly := {}
-mainClass in assembly := Some("it.vinmar.Main")
+mainClass in assembly := Some("it.vinmar.selenium.Main")
 
 // META-INF discarding
 assemblyMergeStrategy in assembly := {

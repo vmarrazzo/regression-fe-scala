@@ -1,14 +1,14 @@
-package it.vinmar
+package it.vinmar.selenium
 
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import it.vinmar.ManagerExecutorProtocol.{NewTestBook, TestResults}
+import it.vinmar.{TestBookReader, TestResult, TestResultWriter}
+import org.openqa.selenium.remote.DesiredCapabilities
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, MustMatchers}
 
-import scala.concurrent.duration._
-import it.vinmar.MasterWorkerProtocol._
-import org.openqa.selenium.remote.DesiredCapabilities
-
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
   * Created by vincenzo on 20/01/16.

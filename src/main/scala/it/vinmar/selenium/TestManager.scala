@@ -1,84 +1,17 @@
-package it.vinmar
-
-import it.vinmar.TestBookReader.InputTest
-import org.openqa.selenium.remote.DesiredCapabilities
-import org.slf4j.LoggerFactory
-
-import akka.actor._
-import akka.routing._
-
-import akka.actor.SupervisorStrategy._
-
-import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.duration._
+package it.vinmar.selenium
 
 import java.net.URL
 
-object MasterWorkerProtocol {
+import akka.actor.SupervisorStrategy._
+import akka.actor._
+import akka.routing._
+import it.vinmar.ManagerExecutorProtocol._
+import it.vinmar.{TestBookTimeout, TestResult}
+import org.openqa.selenium.remote.DesiredCapabilities
+import org.slf4j.LoggerFactory
 
-  // Messages to Master
-  case class NewTestBook(testBook: Seq[InputTest])
-  case object TimeoutOnTestBook
-
-  // Messagges from Master
-  case class TestResults(testResults: Seq[TestResult])
-  case object ManagerEncounterInitProblem
-
-  // Messages from Workers
-  // case class WorkerCreated(worker: ActorRef)
-  // case class WorkerRequestsWork(worker: ActorRef)
-  // case class WorkIsDone(worker: ActorRef)
-
-  // Messages to Workers
-  // case class WorkToBeDone(work: Any)
-  case object WorkIsReady
-  // case object NoWorkToBeDone
-}
-
-/**
- * This actor is used to force TestManager Timeout to avoid resource locking for long time
- *
- * @param timeout
- */
-class TestBookTimeout(timeout: FiniteDuration = 10.minutes) extends Actor {
-
-  /**
-   *
-   */
-  private var timeoutStarted: Boolean = false
-
-  import MasterWorkerProtocol._
-
-  /**
-   * Logger
-   */
-  private def logger = LoggerFactory.getLogger(this.getClass)
-
-  override def preStart : Unit = {
-
-    logger.trace(s"Init TestManager with a timeout of ${timeout.toString}")
-  }
-
-  override def receive: Receive = {
-
-    case WorkIsReady => {
-      if (!timeoutStarted) {
-
-        logger.trace(s"TestBookTimeout will stop @ ${timeout.toString}")
-
-        import scala.concurrent.ExecutionContext.Implicits.global
-
-        context.system.scheduler.scheduleOnce(timeout, sender, TimeoutOnTestBook)
-
-        timeoutStarted = true
-      }
-    }
-    case x: Any => {
-      logger.warn(s"Received an un-handled message from ${sender.path.name}!")
-      unhandled(x)
-    }
-  }
-}
+import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration._
 
 /**
  * This is the core actor that manages the test book execution
@@ -87,8 +20,6 @@ class TestManager(val desiredBrowser: DesiredCapabilities, val grid: Option[URL]
 
   def this(grid: Option[URL]) = this(DesiredCapabilities.firefox, grid)
   def this(desiredBrowser: DesiredCapabilities) = this(desiredBrowser, None)
-
-  import MasterWorkerProtocol._
 
   /**
    * Logger

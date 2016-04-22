@@ -1,11 +1,12 @@
-package it.vinmar
+package it.vinmar.selenium
 
-import it.vinmar.TestBookReader.{InputTest, MatchContent, XpathContent}
-import it.vinmar.MasterWorkerProtocol._
-import org.openqa.selenium.remote.DesiredCapabilities
-import org.scalatest._
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import it.vinmar.ManagerExecutorProtocol.{ManagerEncounterInitProblem, NewTestBook, TestResults}
+import it.vinmar.TestBookReader.{InputTest, MatchContent, XpathContent}
+import it.vinmar.{TestResult, TestResultWriter}
+import org.openqa.selenium.remote.DesiredCapabilities
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, MustMatchers}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -79,7 +80,7 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
     within(testTimeout) {
       val underTest = TestActorRef( props, name="TestManager_under_test_grid_fail")
       underTest ! NewTestBook(testBook)
-      expectMsg(MasterWorkerProtocol.ManagerEncounterInitProblem)
+      expectMsg(ManagerEncounterInitProblem)
       Thread.sleep(3000)
     }
   }
@@ -93,7 +94,7 @@ class TestManagerTest(_system: ActorSystem) extends TestKit(_system)
     within(testTimeout) {
       val underTest = TestActorRef( props, name="TestManager_under_test_unsupported_browser")
       underTest ! NewTestBook(testBook)
-      expectMsg(MasterWorkerProtocol.ManagerEncounterInitProblem)
+      expectMsg(ManagerEncounterInitProblem)
       Thread.sleep(3000)
     }
   }

@@ -1,11 +1,11 @@
 package it.vinmar
 
-import org.scalatest._
-import Matchers._
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, MustMatchers}
+import org.scalatest.Matchers._
 
 import scala.collection.JavaConversions._
 
-import it.vinmar.TestBookReader._
+import TestBookReader._
 
 class TestBookReaderTest extends FlatSpec with BeforeAndAfterAll with MustMatchers {
 

@@ -1,15 +1,15 @@
-package it.vinmar
+package it.vinmar.selenium
+
+import java.io.File
+import java.net.{URI, URL}
 
 import akka.actor.{ActorSystem, Props}
-import org.slf4j.LoggerFactory
-import java.net.{URI, URL}
-import java.io.File
-
 import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.{Level, Logger, LoggerContext}
+import it.vinmar.{TestBookReader, TestResultsListener}
 import org.openqa.selenium.remote.DesiredCapabilities
+import org.slf4j.LoggerFactory
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
 /**
@@ -29,7 +29,7 @@ object Main {
                       logfile: File = null, zipstatistic: Boolean = false)
 
     val unitParser1 = new scopt.OptionParser[Config]("Regression Front-End") {
-      head("Regression Front-End", "0.1.0")
+      head("Regression Front-End", "0.2.0-SNAPSHOT")
       opt[File]("testfile") required() valueName("<file>") action( (f,c) =>
         c.copy(testfile = f) ) text("Input file *.xlsx")
       opt[String]("sheetname") required() valueName("<sheet>") action( (s,c) =>

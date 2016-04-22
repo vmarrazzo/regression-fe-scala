@@ -1,21 +1,19 @@
-package it.vinmar
-
-import java.util.concurrent.TimeUnit
-
-import it.vinmar.TestBookReader._
-import it.vinmar.TestResult._
-import it.vinmar.TestSubStatus._
-import org.openqa.selenium.chrome.{ ChromeDriver, ChromeOptions }
-import org.openqa.selenium.support.ui.WebDriverWait
-
-import org.slf4j.LoggerFactory
-
-import akka.actor.Actor
-import org.openqa.selenium._
-import org.openqa.selenium.firefox.{ FirefoxDriver, FirefoxProfile }
-import org.openqa.selenium.remote.{ RemoteWebDriver, DesiredCapabilities }
+package it.vinmar.selenium
 
 import java.net.URL
+import java.util.concurrent.TimeUnit
+
+import akka.actor.Actor
+import it.vinmar.TestBookReader.{InputTest, MatchContent, XpathContent}
+import it.vinmar.TestSubStatus._
+import it.vinmar.TestResult
+import it.vinmar.TestResult.{Failed, Passed}
+import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxProfile}
+import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
+import org.openqa.selenium.support.ui.WebDriverWait
+import org.slf4j.LoggerFactory
 
 class TestExecutor(val desiredBrowser: DesiredCapabilities, val grid: Option[URL] = None) extends Actor /* logger akka ? */ {
 
@@ -69,11 +67,9 @@ class TestExecutor(val desiredBrowser: DesiredCapabilities, val grid: Option[URL
     case in: InputTest => sender ! {
       val locType = in.testType
 
-      import it.vinmar.TestExecutor._
+      log.info(s"Received ${in.testId}")
 
-      logger.info(s"Received ${in.testId}")
-
-      val wait = new WebDriverWait( driver, MAX_LOAD_TIME)
+      val wait = new WebDriverWait( driver, TestExecutor.MAX_LOAD_TIME)
 
       val loadResult = wait.until(new Time2DisplayCondition( in.url, locType match {
         case MatchContent => Time2DisplayCondition.MatchContextLocator(in.rule)
@@ -88,18 +84,18 @@ class TestExecutor(val desiredBrowser: DesiredCapabilities, val grid: Option[URL
       val resp: TestResult = {
         if (isErrorSubStatus(loadResult)) {
 
-          logger.debug(s"Test failed on loading phase : ${in.testId}")
+          log.debug(s"Test failed on loading phase : ${in.testId}")
 
           new TestResult(in.testId, Failed, loadResult, None)
         } else {
 
-          logger.debug(s"Execute test ${in.testId} as ${locType}")
+          log.debug(s"Execute test ${in.testId} as ${locType}")
 
           new TestResult(in.testId, if ( loadResult > 0 ) Passed else Failed, loadResult, None)
         }
       }
 
-      logger.info(s"Send test result of ${in.testId}")
+      log.info(s"Send test result of ${in.testId}")
 
       resp
     }

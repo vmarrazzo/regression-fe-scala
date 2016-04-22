@@ -2,15 +2,12 @@ package it.vinmar
 
 import java.io.FileOutputStream
 
-import it.vinmar.TestResult.{ Failed, Passed }
-import it.vinmar.TestSubStatus.{ SystemError, SeleniumError, TimeoutError }
-
-import org.apache.poi.ss.usermodel.{ Cell, CellStyle, Font, IndexedColors, Row, Sheet }
-import org.apache.poi.xssf.usermodel.{ XSSFFont, XSSFWorkbook }
-
+import org.apache.poi.ss.usermodel.{Cell, CellStyle, Font, IndexedColors, Row, Sheet}
+import org.apache.poi.xssf.usermodel.{XSSFFont, XSSFWorkbook}
 import org.slf4j.LoggerFactory
-
-import it.vinmar.TestBookReader._
+import TestBookReader.InputTest
+import TestResult.{Failed, Passed}
+import TestSubStatus.{SeleniumError, SystemError, TimeoutError}
 
 /**
  * General object that encapsulate result file writing
