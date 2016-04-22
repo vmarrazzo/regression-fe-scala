@@ -78,6 +78,11 @@ class TestExecutor(val desiredBrowser: DesiredCapabilities, val grid: Option[URL
       val loadResult = wait.until(new Time2DisplayCondition( in.url, locType match {
         case MatchContent => Time2DisplayCondition.MatchContextLocator(in.rule)
         case XpathContent => By.xpath(in.rule)
+        case e : Any => {
+          val message = s"This executor cannot handle this kind of testcase ${e.getClass}"
+          log.error(message)
+          throw new IllegalArgumentException(message)
+        }
       }))
 
       val resp: TestResult = {

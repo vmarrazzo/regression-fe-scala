@@ -32,6 +32,11 @@ object TestBookReader {
   private val NO_MONITORING_ : String = "NoMonitoringIsRequested"
 
   /**
+    * Default supported TestType list
+    */
+  implicit val supportedTestType : List[TestType] = List(MatchContent, XpathContent)
+
+  /**
    * Parse the input MS Excel file and return a compliant test book
    *
    * @param fileName is the absolute path to MS Excel file
@@ -40,7 +45,10 @@ object TestBookReader {
    *
    * @return List[GenericTest] with parsed test book
    */
-  def parseInputTestBook(fileName : String, sheetName : String = DEFAULT_SHEETNAME_, monitoring : String = NO_MONITORING_) : List[InputTest] = {
+  def parseInputTestBook(fileName : String,
+                         sheetName : String = DEFAULT_SHEETNAME_,
+                         monitoring : String = NO_MONITORING_)
+                        (implicit supportedTestType : List[TestType]) : List[InputTest] = {
 
     logger.info("Start MS Excel parsing")
     logger.info(s"File name -> ${fileName}")
@@ -56,9 +64,11 @@ object TestBookReader {
       s"TestId_%04d".formatLocal(java.util.Locale.US, count)
     }
 
+    val testTypePreProcessor = new TestTypePreProcessor(supportedTestType)
+
     val testBook: List[InputTest] = sheet.rowIterator
-      .filter((r: Row) => !TestTypePreProcessor.identifyTestTypeFromRow(r, monitoring).equals(None))
-      .map((f: Row) => TestTypePreProcessor.createNewGenericTest(generateNextId, f)).toList
+      .filter((r: Row) => !testTypePreProcessor.identifyTestTypeFromRow(r, monitoring).equals(None))
+      .map((f: Row) => testTypePreProcessor.createNewGenericTest(generateNextId, f)).toList
 
     logger.info(s"Created a book of ${testBook.size} tests.")
 
@@ -102,11 +112,7 @@ object TestBookReader {
 
   case object MatchContent extends TestType(8, 9)
   case object XpathContent extends TestType(10, 11)
-
-  /**
-   * List of supported template
-   */
-  val supportedTestType : List[TestType] = List(MatchContent, XpathContent)
+  case object JsonPathContent extends TestType(12, 13)
 
   /**
    *
@@ -128,7 +134,7 @@ object TestBookReader {
   /**
    * This object encapsulate all information on test types handled into application
    */
-  private object TestTypePreProcessor {
+  private class TestTypePreProcessor(supportedTestType : List[TestType]) {
 
     /**
      * Description column index

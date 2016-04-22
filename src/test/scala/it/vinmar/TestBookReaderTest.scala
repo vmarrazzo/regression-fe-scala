@@ -94,4 +94,15 @@ class TestBookReaderTest extends FlatSpec with BeforeAndAfterAll with MustMatche
 
     testBook.length should be (3)
   }
+
+  it should "fetches new supported test type" in {
+
+    implicit val supported = List(JsonPathContent)
+
+    val testBook = TestBookReader.parseInputTestBook(file, sheetName)
+
+    testBook should not be (null)
+
+    testBook.size must be(0)
+  }
 }

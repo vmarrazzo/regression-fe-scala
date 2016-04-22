@@ -1,12 +1,12 @@
 package it.vinmar
 
-import akka.actor._
+import akka.actor.{ActorSystem, Props}
 import org.slf4j.LoggerFactory
-import it.vinmar.MasterWorkerProtocol.{ManagerEncounterInitProblem, NewTestBook, TestResults, TimeoutOnTestBook}
-import it.vinmar.TestBookReader.InputTest
 import java.net.{URI, URL}
 import java.io.File
 
+import ch.qos.logback.classic.joran.JoranConfigurator
+import ch.qos.logback.classic.{Level, Logger, LoggerContext}
 import org.openqa.selenium.remote.DesiredCapabilities
 
 import scala.concurrent.duration.Duration
@@ -52,10 +52,6 @@ object Main {
       case Some(config) => {
 
         if (config.logfile != null) {
-
-          import ch.qos.logback.classic.LoggerContext
-          import ch.qos.logback.classic.joran.JoranConfigurator
-
           val logCtx = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
 
           val configurator = new JoranConfigurator
@@ -64,10 +60,6 @@ object Main {
           configurator.doConfigure(config.logfile)
         }
         else {
-
-          import ch.qos.logback.classic.Level
-          import ch.qos.logback.classic.Logger
-
           val root = LoggerFactory.getLogger("root").asInstanceOf[Logger];
           root.setLevel(Level.OFF);
         }
@@ -80,85 +72,9 @@ object Main {
         val system = ActorSystem("MySystem")
         val tm = system.actorOf(Props(classOf[TestManager], DesiredCapabilities.firefox, config.grid, timeout), "MyTestManager")
 
-        val bl = system.actorOf(Props(classOf[BookListener], tb, tm, timeout), "MyBookListener")
+        val bl = system.actorOf(Props(classOf[TestResultsListener], tb, "FE-Regress", tm, timeout), "MyBookListener")
       }
       case None => unitParser1.showUsage
-    }
-
-
-    /**
-      * Application actor that handles :<br>
-      *   <li> TM work time into timeout
-      *   <li> Save the collected test results
-      *
-      * @param book
-      * @param manager
-      */
-    class BookListener(val book: List[InputTest], val manager: ActorRef, val deadline: Duration) extends Actor {
-
-      import java.util.{ Timer, TimerTask }
-      import java.text.SimpleDateFormat
-
-      val formatter = new SimpleDateFormat("yyyyMMdd_HHmmss")
-
-      val timer = new Timer(true)
-
-      /**
-        * Logger
-        */
-      private def logger = LoggerFactory.getLogger(this.getClass)
-
-      override def preStart: Unit = {
-
-        logger.info(s"Send to manager test book with ${book.size} test cases.")
-
-        manager ! NewTestBook(book)
-
-        logger.info(s"Test Manager deadline is ${deadline} to complete test book.")
-
-        timer.schedule(new TimerTask {
-          def run() = {
-
-            logger.error(s"Test Manager does not complete into ${deadline} so force ending!")
-
-            manager ! TimeoutOnTestBook
-
-            timer.cancel
-          }
-        }, deadline.toMillis)
-      }
-
-      override def receive: Receive = {
-
-        case TestResults(results) => {
-
-          if (sender.equals(manager)) {
-
-            logger.info(s"Received from manager test result with ${results.size} test case.")
-
-            val outputFilename = s"./FE-Regress_${formatter.format(java.util.Calendar.getInstance.getTime)}.xlsx"
-            TestResultWriter.generateDataSheetReport( outputFilename, book, results)
-
-            manager ! PoisonPill
-
-            timer.cancel
-
-            context.system.terminate()
-          }
-        }
-        case ManagerEncounterInitProblem => {
-
-          logger.error("Manager reports problem during startup phase so no data collected!")
-
-          timer.cancel
-
-          context.system.terminate()
-        }
-        case x: Any => {
-          logger.warn(s"Received an un-handled message from ${sender.path.name}!")
-          unhandled(x)
-        }
-      }
     }
 
   }
