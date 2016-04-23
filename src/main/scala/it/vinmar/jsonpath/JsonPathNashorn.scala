@@ -1,6 +1,6 @@
 package it.vinmar.jsonpath
 
-import java.io.FileReader
+import java.io.{FileReader, InputStreamReader}
 import javax.script.{ScriptEngine, ScriptEngineManager, ScriptException}
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror
@@ -60,7 +60,7 @@ object JsonPathNashorn {
               */
             val engineManager: ScriptEngineManager = new ScriptEngineManager
             val engine : ScriptEngine = engineManager.getEngineByName("nashorn")
-            engine.eval(new FileReader("src/main/resources/jsonpath.js"))
+            engine.eval(new InputStreamReader(getClass.getClassLoader.getResourceAsStream("jsonpath.js")))
 
             val command : String = "JSONPath(\"" + jsonPath + "\", " + jsonData + ");"
             val ans = engine.eval(command).asInstanceOf[ScriptObjectMirror]
