@@ -57,6 +57,7 @@ class JsonPathScalaTest extends FlatSpec
   val patternsComplex: Map[String, Boolean] = List(
     new Tuple2("$",true),
     new Tuple2("$..author",true),
+	new Tuple2("$.[?(@property !== 'store')].color", true),
     new Tuple2("$..*[?(@.color)]",true),
     new Tuple2("$..*[?(@.color=='green')]",false),
     new Tuple2("$..*[?(@.color=='red' || @.price == 8.95)]",true),
