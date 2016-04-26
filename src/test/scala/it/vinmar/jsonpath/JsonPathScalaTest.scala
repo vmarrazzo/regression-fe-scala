@@ -1,6 +1,7 @@
 package it.vinmar.jsonpath
 
 import java.io.{FileReader, IOException}
+import java.net.MalformedURLException
 import javax.script.{ScriptEngine, ScriptEngineManager, ScriptException}
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror
@@ -141,14 +142,14 @@ class JsonPathScalaTest extends FlatSpec
 
   it should "works with real JSON in concurrent scenario with error handling" in {
 
-    val badUrl = "http://mobile.seat.it/mwrapper/detailpb?output=json&pagesize=25&client=pbbrowsing&id=milano%2Ffoffano-luca-luca.7185235&lang=null&version=4.0.1&device=evo"
+    val badUrl = "http://www.paginegialle.it/"
 
     intercept[IOException] {
       Await.result(JsonPathNashorn.testJsonPathOnUrl(badUrl,"$"), 20.seconds)
     }
 
-    // with out of JSONPath string, it returns false and not error
-    val res = Await.result(JsonPathNashorn.testJsonPathOnUrl(goodUrl,"//a[@class='logo']"), 20.seconds)
+    // without any valid JSONPath string, it returns false and not error
+    val res = Await.result(JsonPathNashorn.testJsonPathOnUrl(goodUrl,"$//a[@class='logo']"), 20.seconds)
 
     res must be(false)
   }

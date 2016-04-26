@@ -60,8 +60,8 @@ object Main {
           configurator.doConfigure(config.logfile)
         }
         else {
-          val root = LoggerFactory.getLogger("root").asInstanceOf[Logger];
-          root.setLevel(Level.OFF);
+          val root = LoggerFactory.getLogger("root").asInstanceOf[Logger]
+          root.setLevel(Level.OFF)
         }
 
         val tb = TestBookReader.parseInputTestBook( config.testfile.getAbsolutePath, config.sheetname)

@@ -1,6 +1,6 @@
 package it.vinmar.jsonpath
 
-import java.io.{FileReader, InputStreamReader}
+import java.io.{IOException, InputStreamReader}
 import javax.script.{ScriptEngine, ScriptEngineManager, ScriptException}
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror
@@ -58,29 +58,28 @@ object JsonPathNashorn {
             /**
               * Standard requirement to access Nashorn API
               */
-            val engineManager: ScriptEngineManager = new ScriptEngineManager
-            val engine : ScriptEngine = engineManager.getEngineByName("nashorn")
+            val engine : ScriptEngine = (new ScriptEngineManager).getEngineByName("nashorn")
             engine.eval(new InputStreamReader(getClass.getClassLoader.getResourceAsStream("jsonpath.js")))
 
             val command : String = "JSONPath(\"" + jsonPath + "\", " + jsonData + ");"
             val ans = engine.eval(command).asInstanceOf[ScriptObjectMirror]
             p.success(!ans.isEmpty)
           } catch {
-            case se : ScriptException => {
+            case se : ScriptException =>
               logger.error(s"Error on Nashorn engine -> ${se.getMessage}!")
               p.failure(se)
-            }
           }
 
         } catch {
-          case timeout: TimeoutException => {
+          case ioe : IOException =>
+            logger.error(s"IO error during fetch Json data!")
+            p.failure(ioe)
+          case timeout: TimeoutException =>
             logger.error(s"Timeout on fetch Json data!")
             p.failure(timeout)
-          }
-          case err : Throwable => {
+          case err : Throwable =>
             logger.error(s"Failed to fetch Json data ${err.getCause}")
             p.failure(err)
-          }
         }
 
         p.future

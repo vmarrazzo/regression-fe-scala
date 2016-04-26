@@ -1,6 +1,6 @@
 package it.vinmar.jsonpath
 
-import java.io.File
+import java.io.{File, IOException}
 
 import akka.actor.SupervisorStrategy.{Escalate, Stop}
 import akka.actor.{Actor, ActorInitializationException, ActorRef, ActorSystem, OneForOneStrategy, Props}
@@ -9,7 +9,8 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.{Level, Logger, LoggerContext}
 import it.vinmar.ManagerExecutorProtocol._
 import it.vinmar.TestBookReader.{InputTest, JsonPathContent, TestType}
-import it.vinmar.TestResult.{ Failed, Passed}
+import it.vinmar.TestResult.{Failed, Passed}
+import it.vinmar.TestSubStatus.SystemError
 import it.vinmar.{TestBookReader, TestBookTimeout, TestResult, TestResultsListener}
 import org.slf4j.LoggerFactory
 
@@ -44,10 +45,9 @@ object MainJSONPath {
     }
 
     unitParserJSONPath.parse(args, Config()) match {
-      case Some(config) => {
+      case Some(config) =>
 
         if (config.logfile != null) {
-
           val logCtx = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
 
           val configurator = new JoranConfigurator
@@ -56,25 +56,20 @@ object MainJSONPath {
           configurator.doConfigure(config.logfile)
         }
         else {
-
-          val root = LoggerFactory.getLogger("root").asInstanceOf[Logger];
-          root.setLevel(Level.OFF);
+          val root = LoggerFactory.getLogger("root").asInstanceOf[Logger]
+          root.setLevel(Level.OFF)
         }
 
         // new test type!
         implicit val supportedTestType : List[TestType] = List(JsonPathContent)
-
         val tb = TestBookReader.parseInputTestBook( config.testfile.getAbsolutePath, config.sheetname)
 
         // for now is hardcoded in future will be a command line argument
         val timeout: Duration = 2.hours
 
         val system = ActorSystem("MySystem")
-
         val tm = system.actorOf(Props(classOf[JSONPathTestManager], timeout), "MyTestManager")
-
         val bl = system.actorOf(Props(classOf[TestResultsListener], tb, "BE-JSONPath-Regress", tm, timeout), "MyBookListener")
-      }
       case None => unitParserJSONPath.showUsage
     }
   }
@@ -152,8 +147,8 @@ class JSONPathTestManager(val timeout: Duration = 60.minutes) extends Actor {
     * @return
     */
   override def supervisorStrategy = OneForOneStrategy(maxNrOfRetries = nrTestExecutors,
-                                                      withinTimeRange = 1 minute) {
-    case _: ActorInitializationException      => {
+                                                      withinTimeRange = 1.minute) {
+    case _: ActorInitializationException      =>
 
       logger.error("Error executors initialization!")
 
@@ -161,7 +156,6 @@ class JSONPathTestManager(val timeout: Duration = 60.minutes) extends Actor {
         testSponsor ! ManagerEncounterInitProblem
 
       Stop
-    }
     case _: Exception                => Escalate
   }
 
@@ -171,27 +165,20 @@ class JSONPathTestManager(val timeout: Duration = 60.minutes) extends Actor {
     */
   override def receive = {
 
-    case NewTestBook(tb) => {
+    case NewTestBook(tb) =>
 
       logger.debug(s"Received an input test list of ${tb.size} cases.")
-
       testSponsor = sender
-
       resCounter = tb.size
-
       tb.foreach(teRouter ! _)
-
       timeoutActor ! WorkIsReady
-    }
-    case t: TestResult => {
+
+    case t: TestResult =>
+
       logger.debug(s">>>> Received ${t.testId} result.")
-
       results.append(t)
-
       resCounter -= 1
-
       logger.debug(s"#### Waiting for other ${resCounter} test result")
-
       if (resCounter == 0) {
 
         logger.debug(s">>>> Auto termination procedure")
@@ -201,19 +188,18 @@ class JSONPathTestManager(val timeout: Duration = 60.minutes) extends Actor {
 
         Stop
       }
-    }
-    case TimeoutOnTestBook => {
-      logger.warn(s">>>> Forced termination by timeout")
 
+    case TimeoutOnTestBook =>
+
+      logger.warn(s">>>> Forced termination by timeout")
       testSponsor ! TestResults(results.toList)
       teRouter ! akka.actor.PoisonPill
 
       Stop
-    }
-    case x: Any => {
+
+    case x: Any =>
       logger.warn(s"Received an un-handled message from ${sender.path.name}!")
       unhandled(x)
-    }
   }
 }
 
@@ -264,19 +250,23 @@ class JSONPathTestExecutor extends Actor {
       val resp: TestResult = {
 
         locType match {
-          case JsonPathContent => {
-            val obtained = Await.result(  JsonPathNashorn.testJsonPathOnUrl(in.url,in.rule),
-                                          20.seconds)
+          case JsonPathContent =>
 
-            logger.debug(s"Execute test ${in.testId} as ${locType}")
+            logger.debug(s"Execute test ${in.testId} as $locType")
+            try {
+              val obtained = Await.result(  JsonPathNashorn.testJsonPathOnUrl(in.url,in.rule),
+                20.seconds)
 
-            new TestResult(in.testId, if ( obtained ) Passed else Failed, 0L, None)
-          }
-          case e : Any => {
+              new TestResult(in.testId, if ( obtained ) Passed else Failed, 0L, None)
+            }
+            catch {
+              case ioe: IOException => new TestResult(in.testId, Failed, SystemError.code, None)
+            }
+
+          case e : Any =>
             val message = s"This executor cannot handle this kind of testcase ${e.getClass}"
             logger.error(message)
             throw new IllegalArgumentException(message)
-          }
         }
       }
 
@@ -284,10 +274,10 @@ class JSONPathTestExecutor extends Actor {
 
       resp
     }
-    case x: Any => {
+    case x: Any =>
       logger.warn(s"Received an un-handled message from ${sender.path.name}!")
       unhandled(x)
-    }
+
   }
 
 }
