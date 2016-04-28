@@ -111,7 +111,7 @@ class JsonPathScalaTest extends FlatSpec
     new Tuple2("$",true),
     new Tuple2("$..status",true),
     new Tuple2("$..*[?(@property === 'sortby' && @ === 'relevance')]",true),
-    // new Tuple2("$..*[?(@property === 'status' && @ === '200')]",true),
+    new Tuple2("$.[?(@property === 'status' && @ === '200')]",true),
     new Tuple2("$..params[?(@.device === 'android')]",true),
     new Tuple2("$..*[?(@property === 'device' && @ === 'android')]",true),
     new Tuple2("$..*[?(@property === 'device' && @ !== 'symbian')]",true),
